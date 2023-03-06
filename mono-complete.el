@@ -19,6 +19,7 @@
 
 ;;; Code:
 
+
 ;; ---------------------------------------------------------------------------
 ;; Custom Variables
 
@@ -78,7 +79,6 @@ A nil return value will fall back to the `default-directory'."
 ;; ---------------------------------------------------------------------------
 ;; Custom Callbacks
 
-
 (defcustom mono-complete-debug-log nil ; 'stdout
   "Debug logging (intended for back-end developers)."
   :type
@@ -124,7 +124,6 @@ using `default-directory' as a fallback."
                    (vc-responsible-backend buffer-file-name))))
             (when vc-backend
               (vc-call-backend vc-backend 'root buffer-file-name))))))))
-
 
 (defun mono-complete-project-root ()
   "Return the project directory (or default)."
@@ -304,6 +303,7 @@ IS-CONTEXT is forwarded to the callback."
       (setq backends (funcall backends is-context)))
 
     (mapcar (lambda (id) (mono-complete-backend-load id)) backends)))
+
 
 ;; ---------------------------------------------------------------------------
 ;; Internal Functions
