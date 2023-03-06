@@ -3,7 +3,7 @@
 Emacs Mono-Complete
 ###################
 
-Compilation, providing a suggestion preview while typing.
+Completion, providing a suggestion preview while typing.
 
 The following features are supported:
 
