@@ -115,6 +115,11 @@ Customization
 ``mono-complete-cache-directory``
    The directory to store mono-complete cache data.
 
+``mono-complete-project-root``
+   The function to use to detect the project root from the current buffer.
+
+   The ``default-directory`` is used when this function returns nil.
+
 ``mono-complete-preview-face``
    Face used to display the preview.
 

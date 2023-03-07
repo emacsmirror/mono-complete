@@ -165,8 +165,8 @@ using `default-directory' as a fallback."
 
 (defconst mono-complete--commands '(mono-complete-expand mono-complete-expand-or-fallback))
 
-;; Use this to prevent simulated input running command hooks
-;; (which would trigger the idle timer).
+;; Boolean to use this to prevent simulated input running command hooks
+;; (which would otherwise trigger the idle timer). Use `let' to override this.
 (defconst mono-complete--suppress-command-hooks nil)
 
 
@@ -391,7 +391,6 @@ IS-CONTEXT is forwarded to the callback."
   "Function run when executing another command.
 
 That is, if `this-command' is not one of `mono-complete--commands'."
-
   (mono-complete--backend-cache-clear)
   (setq mono-complete--context nil))
 
@@ -402,12 +401,10 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 (defun mono-complete--backend-call-and-update (complete-fn config prefix backend-cache)
   "Call COMPLETE-FN with CONFIG, PREFIX & update BACKEND-CACHE."
   (let ((time-beg nil))
-
     (when (and mono-complete-debug-log mono-complete-debug-log-time)
       (setq time-beg (current-time)))
 
     (pcase-let ((`(,result . ,cache-next) (funcall complete-fn config prefix (cdr backend-cache))))
-
       (when time-beg
         (mono-complete--debug-log-unchecked
          "backend-call: (%S) %.4f"
@@ -421,7 +418,6 @@ That is, if `this-command' is not one of `mono-complete--commands'."
   "Set VAL for COMPLETE-FN."
   (let ((result-cache-cons (assq 'result-cache mono-complete--context))
         (result-cache nil))
-
     (cond
      (result-cache-cons
       (setq result-cache (cdr result-cache-cons)))
@@ -674,7 +670,6 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--mode-disable ()
   "Turn off option `mono-complete-mode' for the current buffer."
-
   (mono-complete--on-exit)
 
   (mono-complete--command-hooks-disable)
