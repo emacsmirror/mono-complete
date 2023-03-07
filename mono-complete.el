@@ -140,6 +140,7 @@ using `default-directory' as a fallback."
 (defvar-local mono-complete--preview-overlay nil)
 
 ;; The preview overlay state or nil when the command.
+;; This is the result of `mono-complete--preview-state-from-overlay' see it's doc-string for details.
 (defvar-local mono-complete--preview-overlay-was-visible nil)
 
 ;; The preview idle timer.
@@ -647,7 +648,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
          (cancel-timer mono-complete--preview-timer)
          (setq mono-complete--preview-timer nil))))
 
-    (when (memq (symbol-value 'evil-state) '(replace insert))
+    (when (memq (symbol-value 'evil-state) (list 'replace 'insert))
       (mono-complete--command-hooks-enable)))
    (t
     (mono-complete--command-hooks-enable)))
