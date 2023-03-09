@@ -237,7 +237,7 @@ When DESCRIPTIONP is non-nil, return it's description."
 (defun mono-complete--insert-with-literal-input (text)
   "Helper function to simulate input using TEXT."
   (dolist (ch (string-to-list text))
-    (execute-kbd-macro (char-to-string ch))))
+    (execute-kbd-macro (vector ch))))
 
 (defun mono-complete--backend-load-validate-uuid (id uuid config)
   "Validate ID, UUID & CONFIG arguments."
