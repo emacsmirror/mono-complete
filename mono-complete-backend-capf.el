@@ -6,7 +6,7 @@
 
 ;;; Commentary:
 ;; Completion at point function (capf) back-end.
-;
+
 ;;; Code:
 
 (require 'mono-complete)
@@ -39,7 +39,7 @@ When nil, defaults are used (depending on the mode)."
         (setq config (plist-put config :complete-fn 'eglot-completion-at-point)))
        ((eq major-mode 'emacs-lisp-mode)
         (setq config (plist-put config :complete-fn 'elisp-completion-at-point)))
-       (t ;; Disable this backend if no functions can be found.
+       (t ; Disable this backend if no functions can be found.
         (setq config t)))))
 
   config)
