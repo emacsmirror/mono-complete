@@ -106,6 +106,34 @@ Intended for back-end developers investigating performance."
 
 
 ;; ---------------------------------------------------------------------------
+;; Back-Ported Functions
+
+(when (version< emacs-version "29.1")
+  (defmacro with-undo-amalgamate (&rest body)
+    "Like `progn' but perform BODY with amalgamated undo barriers.
+
+This allows multiple operations to be undone in a single step.
+When undo is disabled this behaves like `progn'."
+    (declare (indent 0) (debug t))
+    (let ((handle (make-symbol "--change-group-handle--")))
+      `(let ((,handle (prepare-change-group))
+             ;; Don't truncate any undo data in the middle of this,
+             ;; otherwise Emacs might truncate part of the resulting
+             ;; undo step: we want to mimic the behavior we'd get if the
+             ;; undo-boundaries were never added in the first place.
+             (undo-outer-limit nil)
+             (undo-limit most-positive-fixnum)
+             (undo-strong-limit most-positive-fixnum))
+         (unwind-protect
+             (progn
+               (activate-change-group ,handle)
+               ,@body)
+           (progn
+             (accept-change-group ,handle)
+             (undo-amalgamate-change-group ,handle)))))))
+
+
+;; ---------------------------------------------------------------------------
 ;; Generic Functions
 
 (defun mono-complete-project-root-default ()
@@ -236,7 +264,8 @@ When DESCRIPTIONP is non-nil, return it's description."
 
 (defun mono-complete--insert-with-literal-input (text)
   "Helper function to simulate input using TEXT."
-  (execute-kbd-macro (vconcat text)))
+  (with-undo-amalgamate
+    (execute-kbd-macro (vconcat text))))
 
 (defun mono-complete--backend-load-validate-uuid (id uuid config)
   "Validate ID, UUID & CONFIG arguments."
