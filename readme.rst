@@ -163,6 +163,16 @@ Included Backends
 ``whole-line``
    Complete whole lines.
 
+   **Customization**
+
+   ``mono-complete-backend-whole-line-trailing-text``
+      How to treat text trailing the cursor.
+
+      - "Match Trailing" completion lines must match text after the cursor.
+        This text is trimmed from the completion suggestion.
+      - "No Trailing" completion is only performed when there is no trailing text.
+      - "Ignore Trailing" completion ignores text after the cursor.
+
 ``word-predict``
    Predict the next word using previous words based on a simple statistical model (N-grams).
 
