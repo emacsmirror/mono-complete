@@ -82,8 +82,14 @@
           (t
            nil))))
 
-    (when trailing-text
+    (cond
+     (trailing-text
       (setq search-re (concat search-re "[^\n]*" (regexp-quote trailing-text))))
+     (t
+      ;; At least one character, avoids matching many lines with the same prefix and no suffix.
+      ;; Without this, a HR literal "---" can hang on auto-completion when there are
+      ;; many other HR's in the file.
+      (setq search-re (concat search-re "[^\n]"))))
 
     (save-match-data
       (save-excursion
