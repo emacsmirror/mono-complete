@@ -169,7 +169,15 @@ When IS-PARTIAL is non-nil, an extra word is required."
              (current-buffer)
              ;; Display.
              nil)
-            args)))
+            args))
+
+          ;; Ensure that `default-directory' exists and is readable.
+          ;; Even though the default directory isn't used, `call-process'
+          ;; will fail with an error when called with a buffer open that
+          ;; references a directory that doesn't exist.
+          ;; Assume the users home directory is valid and use this instead.
+          (default-directory (expand-file-name "~")))
+
       (apply #'call-process all-args)
       (buffer-string))))
 
