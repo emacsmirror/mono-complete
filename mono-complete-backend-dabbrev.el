@@ -18,12 +18,13 @@
   "Execute BODY with advice.
 Added WHERE using FN-ADVICE temporarily added to FN-ORIG."
   (declare (indent 3))
-  `(let ((fn-advice-var ,fn-advice))
-     (unwind-protect
-         (progn
-           (advice-add ,fn-orig ,where fn-advice-var)
-           ,@body)
-       (advice-remove ,fn-orig fn-advice-var))))
+  (let ((function-var (gensym)))
+    `(let ((,function-var ,fn-advice))
+       (unwind-protect
+           (progn
+             (advice-add ,fn-orig ,where ,function-var)
+             ,@body)
+         (advice-remove ,fn-orig ,function-var)))))
 
 (defmacro mono-complete-backend-dabbrev--with-suppressed-message (&rest body)
   "Run BODY with the message function disabled entirely."
