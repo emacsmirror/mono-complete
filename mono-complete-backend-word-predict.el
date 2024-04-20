@@ -3,6 +3,7 @@
 ;; Copyright (C) 2023  Campbell Barton
 ;; URL: https://codeberg.org/ideasman42/emacs-mono-complete
 ;; Version: 0.1
+;; Package-Requires: ((emacs "29.1"))
 
 ;;; Commentary:
 ;; Word predict back-end.

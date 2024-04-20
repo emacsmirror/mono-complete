@@ -7,7 +7,7 @@
 
 ;; URL: https://codeberg.org/ideasman42/emacs-mono-complete
 ;; Version: 0.1
-;; Package-Requires: ((emacs "28.1"))
+;; Package-Requires: ((emacs "29.1"))
 
 ;;; Commentary:
 
@@ -103,34 +103,6 @@ Intended for back-end developers investigating performance."
 (defvar mono-complete-mode-map (make-sparse-keymap)
   "Minimal key-map intended to call.
 `mono-complete-expand' or `mono-complete-expand-or-fallback'.")
-
-
-;; ---------------------------------------------------------------------------
-;; Back-Ported Functions
-
-(when (version< emacs-version "29.1")
-  (defmacro with-undo-amalgamate (&rest body)
-    "Like `progn' but perform BODY with amalgamated undo barriers.
-
-This allows multiple operations to be undone in a single step.
-When undo is disabled this behaves like `progn'."
-    (declare (indent 0) (debug t))
-    (let ((handle (make-symbol "--change-group-handle--")))
-      `(let ((,handle (prepare-change-group))
-             ;; Don't truncate any undo data in the middle of this,
-             ;; otherwise Emacs might truncate part of the resulting
-             ;; undo step: we want to mimic the behavior we'd get if the
-             ;; undo-boundaries were never added in the first place.
-             (undo-outer-limit nil)
-             (undo-limit most-positive-fixnum)
-             (undo-strong-limit most-positive-fixnum))
-         (unwind-protect
-             (progn
-               (activate-change-group ,handle)
-               ,@body)
-           (progn
-             (accept-change-group ,handle)
-             (undo-amalgamate-change-group ,handle)))))))
 
 
 ;; ---------------------------------------------------------------------------
