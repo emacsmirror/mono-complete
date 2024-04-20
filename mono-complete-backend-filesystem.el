@@ -128,10 +128,10 @@
           (setcar cache directory)
           (setcdr
            cache
-           (sort
-            (file-name-all-completions
-             "" (mono-complete-backend-filesystem--expand-path directory))
-            #'string-lessp)))
+           (sort (file-name-all-completions
+                  ""
+                  (mono-complete-backend-filesystem--expand-path directory))
+                 #'string-lessp)))
 
         (let ((files (cdr cache)))
           (while files
