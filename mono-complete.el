@@ -112,6 +112,7 @@ Intended for back-end developers investigating performance."
   "Function to find the project root from the current buffer.
 This checks `ffip', `projectile' & `vc' root,
 using `default-directory' as a fallback."
+  (declare (important-return-value t))
   (cond
    ((fboundp 'ffip-project-root)
     (funcall #'ffip-project-root))
@@ -127,6 +128,7 @@ using `default-directory' as a fallback."
 
 (defun mono-complete-project-root ()
   "Return the project directory (or default)."
+  (declare (important-return-value t))
   (file-name-as-directory (or (funcall mono-complete-project-root) default-directory)))
 
 
@@ -197,6 +199,7 @@ using `default-directory' as a fallback."
 
 (defun mono-complete--interactive-or-non-literal-input ()
   "Return non-nil if this command is interactive or literal input is disabled."
+  (declare (important-return-value t))
   (cond
    (mono-complete-literal-input
     ;; Interactive only, when non-interactive,
@@ -209,6 +212,7 @@ using `default-directory' as a fallback."
 (defun mono-complete--key-from-command (fn &optional descriptionp)
   "Return the key for command symbol FN.
 When DESCRIPTIONP is non-nil, return it's description."
+  (declare (important-return-value t))
   (unless (commandp fn)
     (error "Not a command: %s" fn))
   (let ((key
@@ -223,6 +227,7 @@ When DESCRIPTIONP is non-nil, return it's description."
 
 (defun mono-complete--call-interactively-macro (command-symbol)
   "Call COMMAND-SYMBOL as a macro."
+  (declare (important-return-value t))
   (let ((command (symbol-name command-symbol))
         (binding (mono-complete--key-from-command command-symbol t)))
     (unless binding
@@ -236,11 +241,13 @@ When DESCRIPTIONP is non-nil, return it's description."
 
 (defun mono-complete--insert-with-literal-input (text)
   "Helper function to simulate input using TEXT."
+  (declare (important-return-value nil))
   (with-undo-amalgamate
     (execute-kbd-macro (vconcat text))))
 
 (defun mono-complete--backend-load-validate-uuid (id uuid config)
   "Validate ID, UUID & CONFIG arguments."
+  (declare (important-return-value t))
   (unless uuid
     (cond
      (config
@@ -257,6 +264,7 @@ When DESCRIPTIONP is non-nil, return it's description."
 
 (defun mono-complete--backend-load-impl (id &optional uuid config)
   "See `mono-complete-backend-load' for ID UUID & CONFIG doc-strings."
+  (declare (important-return-value t))
   (unless mono-complete--backend-require-cache
     (setq mono-complete--backend-require-cache (make-hash-table :test #'eq)))
 
@@ -283,6 +291,7 @@ When DESCRIPTIONP is non-nil, return it's description."
 (defun mono-complete-backend-load (id &optional uuid config)
   "Load a pre-defined back-end ID.
 When passing in a CONFIG UUID must be a unique identifier in the list."
+  (declare (important-return-value t))
   (cond
    ((and id (symbolp id))
     (setq uuid (mono-complete--backend-load-validate-uuid id uuid config))
@@ -298,6 +307,7 @@ When passing in a CONFIG UUID must be a unique identifier in the list."
 (defun mono-complete--backends-from-config (is-context)
   "Return back-ends from user configuration.
 IS-CONTEXT is forwarded to the callback."
+  (declare (important-return-value t))
   (let ((backends mono-complete-backends))
 
     (when (functionp backends)
@@ -311,14 +321,17 @@ IS-CONTEXT is forwarded to the callback."
 
 (defun mono-complete--is-mono-complete-command (command)
   "Return non-nil if COMMAND is a mono-complete command."
+  (declare (important-return-value t))
   (memq command mono-complete--commands))
 
 (defun mono-complete--is-self-insert-command (command)
   "Return non-nil if COMMAND is a \"self-insert command\"."
+  (declare (important-return-value t))
   (memq command mono-complete-self-insert-commands))
 
 (defun mono-complete--preview-text-at-point ()
   "Show the completion from the text at the point (where possible)."
+  (declare (important-return-value t))
   (let ((result nil)
         (backends-cons (assq 'backends mono-complete--context))
         (backends nil)
@@ -392,6 +405,7 @@ IS-CONTEXT is forwarded to the callback."
   "Function run when executing another command.
 
 That is, if `this-command' is not one of `mono-complete--commands'."
+  (declare (important-return-value nil))
   (mono-complete--backend-cache-clear)
   (setq mono-complete--context nil))
 
@@ -401,6 +415,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--backend-call-and-update (complete-fn config prefix backend-cache)
   "Call COMPLETE-FN with CONFIG, PREFIX & update BACKEND-CACHE."
+  (declare (important-return-value t))
   (let ((time-beg nil))
     (when (and mono-complete-debug-log mono-complete-debug-log-time)
       (setq time-beg (current-time)))
@@ -417,6 +432,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--backend-cache-set (complete-fn val)
   "Set VAL for COMPLETE-FN."
+  (declare (important-return-value nil))
   (let ((result-cache-cons (assq 'result-cache mono-complete--context))
         (result-cache nil))
     (cond
@@ -431,6 +447,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--backend-cache-ensure (complete-fn)
   "Ensure COMPLETE-FN has an entry in `mono-complete--context' (result-cache)."
+  (declare (important-return-value t))
   (let ((result-cache (alist-get 'result-cache mono-complete--context nil nil #'eq)))
     (or
      ;; Existing.
@@ -440,6 +457,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--backend-cache-clear ()
   "Clear back-end cache."
+  (declare (important-return-value nil))
   ;; Get and remove, the key.
   (let ((result-cache (alist-get 'result-cache mono-complete--context nil t #'eq)))
     (when result-cache
@@ -447,6 +465,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--backend-items-or-warn (item)
   "Extract back-end callbacks from ITEM, returning a list or nil."
+  (declare (important-return-value t))
   (let ((config nil)
         ;; Setup is optional.
         (setup-fn nil)
@@ -487,6 +506,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--preview-state-from-overlay ()
   "Return the state of the overlay: (position . (prefix . expansion))."
+  (declare (important-return-value t))
   (when (and mono-complete--preview-overlay (overlay-buffer mono-complete--preview-overlay))
     (cons
      (overlay-start mono-complete--preview-overlay)
@@ -496,6 +516,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 
 (defun mono-complete--preview-create-overlay (prefix expansion)
   "Add EXPANSION overlay (with PREFIX as a property)."
+  (declare (important-return-value t))
   (let ((overlay (make-overlay (point) (point))))
     ;; Empty strings may be used for temporary expansion.
     (unless (string-empty-p expansion)
@@ -510,6 +531,7 @@ That is, if `this-command' is not one of `mono-complete--commands'."
 (defun mono-complete--preview-refresh-from-state (state)
   "Detect when text insertion follows the current preview allowing it to be used.
 Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
+  (declare (important-return-value t))
   (let ((result nil))
     (when state
       (pcase-let ((`(,pos-prev . (,prefix-prev . ,expansion-prev)) state))
@@ -541,11 +563,13 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--preview-text-from-command ()
   "Return the expansion text for the preview displayed when the command began."
+  (declare (important-return-value t))
   (when mono-complete--preview-overlay-was-visible
     (substring-no-properties (cdr (cdr mono-complete--preview-overlay-was-visible)))))
 
 (defun mono-complete--preview (buf)
   "Show the preview for BUF."
+  (declare (important-return-value nil))
   (when (buffer-live-p buf)
     (with-current-buffer buf
       (cancel-timer mono-complete--preview-timer)
@@ -564,6 +588,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--pre-command-hook ()
   "Function run from `pre-command-hook'."
+  (declare (important-return-value nil))
   (unless mono-complete--suppress-command-hooks
     (cond
      (mono-complete--preview-overlay
@@ -575,6 +600,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--post-command-hook ()
   "Function run from `post-command-hook'."
+  (declare (important-return-value nil))
   (unless mono-complete--suppress-command-hooks
     (let ((do-reset :unset)
           (do-clear-timer t))
@@ -619,16 +645,19 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--command-hooks-enable ()
   "Enable command hooks."
+  (declare (important-return-value nil))
   (add-hook 'pre-command-hook #'mono-complete--pre-command-hook nil t)
   (add-hook 'post-command-hook #'mono-complete--post-command-hook nil t))
 
 (defun mono-complete--command-hooks-disable ()
   "Disable command hooks."
+  (declare (important-return-value nil))
   (remove-hook 'pre-command-hook #'mono-complete--pre-command-hook t)
   (remove-hook 'post-command-hook #'mono-complete--post-command-hook t))
 
 (defun mono-complete--mode-enable ()
   "Turn on option `mono-complete-mode' for the current buffer."
+  (declare (important-return-value nil))
   (cond
    ((and mono-complete-evil-insert-mode-only (boundp 'evil-state))
     (add-hook
@@ -671,6 +700,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--mode-disable ()
   "Turn off option `mono-complete-mode' for the current buffer."
+  (declare (important-return-value nil))
   (mono-complete--on-exit)
 
   (mono-complete--command-hooks-disable)
@@ -687,6 +717,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--expand-impl ()
   "Expand the completion, return non-nil on success."
+  (declare (important-return-value nil))
   (let ((text (mono-complete--preview-text-from-command)))
     (when (string-empty-p text)
       (setq text nil))
@@ -716,6 +747,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 ;;;###autoload
 (defun mono-complete-expand ()
   "Expand the completion, return non-nil on success."
+  (declare (important-return-value nil))
   (interactive)
   (when (mono-complete--interactive-or-non-literal-input)
     (mono-complete--expand-impl)))
@@ -724,6 +756,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 (defun mono-complete-expand-or-fallback ()
   "Expand the completion, return non-nil on success.
 Otherwise run `mono-complete-callback-fn' and return it's result."
+  (declare (important-return-value nil))
   (interactive)
   (when (mono-complete--interactive-or-non-literal-input)
     (let ((result (mono-complete--expand-impl)))
