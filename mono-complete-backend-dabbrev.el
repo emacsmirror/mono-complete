@@ -15,32 +15,50 @@
 ;; ---------------------------------------------------------------------------
 ;; Internal Utilities
 
-(defmacro mono-complete-backend-dabbrev--with-advice (fn-orig where fn-advice &rest body)
-  "Execute BODY with advice.
-Added WHERE using FN-ADVICE temporarily added to FN-ORIG."
-  (declare (indent 3))
-  (let ((function-var (gensym)))
-    `(let ((,function-var ,fn-advice))
+(defmacro mono-complete-backend-dabbrev--with-advice (advice &rest body)
+  "Execute BODY with ADVICE temporarily enabled.
+
+Advice are triplets of (SYMBOL HOW FUNCTION),
+see `advice-add' documentation."
+  (declare (indent 1))
+  (let ((body-let nil)
+        (body-advice-add nil)
+        (body-advice-remove nil)
+        (item nil))
+    (while (setq item (pop advice))
+      (let ((fn-sym (gensym))
+            (fn-advise (pop item))
+            (fn-advice-ty (pop item))
+            (fn-body (pop item)))
+        ;; Build the calls for each type.
+        (push (list fn-sym fn-body) body-let)
+        (push (list 'advice-add fn-advise fn-advice-ty fn-sym) body-advice-add)
+        (push (list 'advice-remove fn-advise fn-sym) body-advice-remove)))
+    (setq body-let (nreverse body-let))
+    (setq body-advice-add (nreverse body-advice-add))
+    ;; Compose the call.
+    `(let ,body-let
        (unwind-protect
            (progn
-             (advice-add ,fn-orig ,where ,function-var)
+             ,@body-advice-add
              ,@body)
-         (advice-remove ,fn-orig ,function-var)))))
+         ,@body-advice-remove))))
 
 (defmacro mono-complete-backend-dabbrev--with-suppressed-message (&rest body)
   "Run BODY with the message function disabled entirely."
   (declare (indent 0))
-  `(mono-complete-backend-dabbrev--with-advice 'message :override (lambda (&rest _args) nil)
+  `(mono-complete-backend-dabbrev--with-advice (('message :override (lambda (&rest _args) nil)))
      ,@body))
 
 (defmacro mono-complete-backend-dabbrev--with-suppressed-message-advice (function-sym &rest body)
   "Advise FUNCTION-SYM to run BODY with `message' disabled."
   (declare (indent 1))
-  `(mono-complete-backend-dabbrev--with-advice ,function-sym
-       :around
-       (lambda (fn-orig &rest args)
-         (mono-complete-backend-dabbrev--with-suppressed-message
-           (apply fn-orig args)))
+  `(mono-complete-backend-dabbrev--with-advice
+       ((,function-sym
+         :around
+         (lambda (fn-orig &rest args)
+           (mono-complete-backend-dabbrev--with-suppressed-message
+             (apply fn-orig args)))))
      ,@body))
 
 ;; Messages from `dabbrev--find-expansion' ("Scanning for dabbrevs...done")
