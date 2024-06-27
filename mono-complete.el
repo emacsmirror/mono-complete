@@ -643,6 +643,25 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 ;; ---------------------------------------------------------------------------
 ;; Internal Mode Management
 
+;; Temporary enable/disable are used so modal editing can temporarily
+;; enable mono-complete functionality while in "insert" mode.
+;; This has the advantage that it can be disabled unless inserting text.
+
+(defun mono-complete--temporary-enable ()
+  "Temporary enable."
+  ;; Only add hooks.
+  (mono-complete--command-hooks-enable))
+
+(defun mono-complete--temporary-disable ()
+  "Temporary disable."
+  (mono-complete--command-hooks-disable)
+  ;; Clear overlays.
+  (mono-complete--on-exit)
+
+  (when (timerp mono-complete--preview-timer)
+    (cancel-timer mono-complete--preview-timer)
+    (setq mono-complete--preview-timer nil)))
+
 (defun mono-complete--command-hooks-enable ()
   "Enable command hooks."
   (declare (important-return-value nil))
@@ -659,25 +678,15 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
   "Turn on option `mono-complete-mode' for the current buffer."
   (declare (important-return-value nil))
   (cond
-   ((and mono-complete-evil-insert-mode-only (boundp 'evil-state))
-    (add-hook
-     'evil-insert-state-entry-hook
-     (lambda ()
-       ;; Only add hooks.
-       (mono-complete--command-hooks-enable)))
-    (add-hook
-     'evil-insert-state-exit-hook
-     (lambda ()
-       (mono-complete--command-hooks-disable)
+   ;; It's possible evil mode variables are available
+   ;; but the user is not in evil mode for this buffer, so check `evil-mode' first.
+   ((and mono-complete-evil-insert-mode-only (bound-and-true-p evil-mode))
+    (add-hook 'evil-insert-state-entry-hook #'mono-complete--temporary-enable nil t)
+    (add-hook 'evil-insert-state-exit-hook #'mono-complete--temporary-disable nil t)
 
-       ;; Clear overlays.
-       (mono-complete--on-exit)
-
-       (when (timerp mono-complete--preview-timer)
-         (cancel-timer mono-complete--preview-timer)
-         (setq mono-complete--preview-timer nil))))
-
-    (when (memq (symbol-value 'evil-state) (list 'replace 'insert))
+    ;; The symbol `evil-state' is most likely set when `evil-mode' is enabled.
+    ;; Check it's bound to avoid an error in the off-chance it's not.
+    (when (and (boundp 'evil-state) (memq (symbol-value 'evil-state) (list 'replace 'insert)))
       (mono-complete--command-hooks-enable)))
    (t
     (mono-complete--command-hooks-enable)))
@@ -704,6 +713,11 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
   (mono-complete--on-exit)
 
   (mono-complete--command-hooks-disable)
+
+  (when mono-complete-evil-insert-mode-only
+    ;; Harmless if these were not added.
+    (remove-hook 'evil-insert-state-entry-hook #'mono-complete--temporary-enable t)
+    (remove-hook 'evil-insert-state-exit-hook #'mono-complete--temporary-disable t))
 
   (when mono-complete--preview-overlay
     (delete-overlay mono-complete--preview-overlay))
