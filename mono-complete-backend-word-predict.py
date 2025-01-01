@@ -34,19 +34,15 @@ import re
 # To store an `input_path` directory as a file-name.
 from urllib.parse import quote
 
-
-from typing import (
+from collections.abc import (
     Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
+    Iterator,
     Sequence,
-    Tuple,
 )
 
-ModelType = Dict[str, Dict[str, int]]
-ManifestType = Tuple[List[str], List[float]]
+
+ModelType = dict[str, dict[str, int]]
+ManifestType = tuple[list[str], list[float]]
 
 # Gets overwritten by command line argument.
 CACHE_DIRECTORY = ""
@@ -74,7 +70,10 @@ FILE_TYPE_TEXT = 1
 
 
 # Include all files recursively.
-def files_recursive_with_ext(path: str, ext: Optional[Tuple[str, ...]]) -> Generator[Tuple[str, str], None, None]:
+def files_recursive_with_ext(
+        path: str,
+        ext: tuple[str, ...] | None,
+) -> Iterator[tuple[str, str]]:
     for dirpath, dirnames, filenames in os.walk(path):
         # Skip `.git` and other dot-files.
         dirnames[:] = [d for d in dirnames if not d.startswith(".")]
@@ -91,7 +90,10 @@ _clear_words_trans = {
 }
 
 
-def words_from_file_with_fancy_lexer_support(filepath: str, file_type: int) -> List[List[str]]:
+def words_from_file_with_fancy_lexer_support(
+        filepath: str,
+        file_type: int,
+) -> list[list[str]]:
     """
     Fill ``bag_of_words`` with comments from ``filepath``.
     """
@@ -107,9 +109,9 @@ def words_from_file_with_fancy_lexer_support(filepath: str, file_type: int) -> L
     if not data:
         return []
 
-    def clean_words(words: List[str]) -> List[List[str]]:
-        words_list: List[List[str]] = []
-        this_word_list: List[str] = []
+    def clean_words(words: list[str]) -> list[list[str]]:
+        words_list: list[list[str]] = []
+        this_word_list: list[str] = []
         last_split = False
         for i, w in enumerate(words):
             if (
@@ -170,7 +172,7 @@ def words_from_file_with_fancy_lexer_support(filepath: str, file_type: int) -> L
         Token.Comment.Multiline,
     }
 
-    bag_of_words: List[List[str]] = []
+    bag_of_words: list[list[str]] = []
     is_first = True
     assert hasattr(lexer, "get_tokens")
     for ty, token_text in lexer.get_tokens(data):
@@ -188,7 +190,7 @@ def words_from_file_with_fancy_lexer_support(filepath: str, file_type: int) -> L
     return bag_of_words
 
 
-def words_from_files(files_and_types: List[Tuple[str, int]]) -> List[List[str]]:
+def words_from_files(files_and_types: list[tuple[str, int]]) -> list[list[str]]:
     bag_of_words = []
     if MULTI_PROCESS:
         import multiprocessing
@@ -221,19 +223,26 @@ def directory_from_params(input_path: str) -> str:
     return os.path.join(CACHE_DIRECTORY, quote(input_path.lstrip(os.sep), safe=''))
 
 
-def model_filpath_from_params(n: int, split_index: int, input_path: str) -> str:
+def model_filpath_from_params(
+        n: int,
+        split_index: int,
+        input_path: str,
+) -> str:
     directory = directory_from_params(input_path)
     return os.path.join(directory, "{:d}_{:04d}.pickle".format(n, split_index))
 
 
-def model_generate_all(n: int, bag_of_words: List[List[str]]) -> List[ModelType]:
+def model_generate_all(
+        n: int,
+        bag_of_words: list[list[str]],
+) -> list[ModelType]:
     """
     Return a list of models.
     """
     if n < 2:
         raise Exception("`n` must be 2 or more.")
 
-    model_list: List[ModelType] = [{} for _ in range(SPLIT_BUCKET_COUNT)]
+    model_list: list[ModelType] = [{} for _ in range(SPLIT_BUCKET_COUNT)]
     for words in bag_of_words:
         for i in range(n, len(words)):
             word_key = " ".join(words[j].lower() for j in range(i - n, i))
@@ -272,7 +281,7 @@ def model_ensure_for_split_index(
         n: int,
         split_index: int,
         input_path: str,
-        word_generate_on_demand_fn: Callable[[], List[List[str]]],
+        word_generate_on_demand_fn: Callable[[], list[list[str]]],
 ) -> ModelType:
     filepath = model_filpath_from_params(n, split_index, input_path)
     if os.path.exists(filepath):
@@ -291,7 +300,7 @@ def model_files_generate(
         input_path: str,
         input_paths_match_source_re: re.Pattern[str],
         input_paths_match_text_re: re.Pattern[str],
-) -> List[Tuple[str, int]]:
+) -> list[tuple[str, int]]:
 
     files_and_types = []
     is_file = not os.path.isdir(input_path)
@@ -341,14 +350,20 @@ def manifest_file_read(filepath: str) -> ManifestType:
     return manifest
 
 
-def manifest_file_write(filepath: str, manifest: ManifestType) -> None:
+def manifest_file_write(
+        filepath: str,
+        manifest: ManifestType,
+) -> None:
     import pickle
     with open(filepath, 'wb') as fh:
         pickle.dump(manifest, fh)
 
 
 def model_ensure_up_to_date_or_clear(
-        input_path: str, files_and_types: List[Tuple[str, int]], update_method: str) -> None:
+        input_path: str,
+        files_and_types: list[tuple[str, int]],
+        update_method: str,
+) -> None:
     directory = directory_from_params(input_path)
 
     # Quick check, for simple case.
@@ -378,7 +393,10 @@ def model_ensure_up_to_date_or_clear(
         os.makedirs(directory)
 
 
-def manifest_write_from_files(input_path: str, files_and_types: List[Tuple[str, int]]) -> None:
+def manifest_write_from_files(
+        input_path: str,
+        files_and_types: list[tuple[str, int]],
+) -> None:
     files = [ft[0] for ft in files_and_types]
     mtime = [0.0] * len(files)
     for i, filepath in enumerate(files):
@@ -394,10 +412,10 @@ def manifest_write_from_files(input_path: str, files_and_types: List[Tuple[str, 
 
 def complete_word_with_root(
         input_path: str,
-        words: List[str],
+        words: list[str],
         partial_word: str,
-        input_paths_match_source: List[str],
-        input_paths_match_text: List[str],
+        input_paths_match_source: list[str],
+        input_paths_match_text: list[str],
         update_method: str,
         generate_all: bool,
 ) -> bool:
@@ -405,7 +423,7 @@ def complete_word_with_root(
     bag_of_words = None
     files_and_types = None
 
-    def files_generage_on_demand() -> List[Tuple[str, int]]:
+    def files_generage_on_demand() -> list[tuple[str, int]]:
         import fnmatch
         nonlocal files_and_types
 
@@ -436,7 +454,7 @@ def complete_word_with_root(
 
         return files_and_types
 
-    def word_generator_on_demand() -> List[List[str]]:
+    def word_generator_on_demand() -> list[list[str]]:
         nonlocal bag_of_words
         if bag_of_words is not None:
             return bag_of_words
@@ -522,10 +540,10 @@ def main() -> None:
     args = sys.argv[1:]
 
     def extract_arg_value_pair(
-        arg_id: str,
-        *,
-        default: Optional[str] = None,
-        valid_values: Optional[Sequence[str]] = None,
+            arg_id: str,
+            *,
+            default: str | None = None,
+            valid_values: Sequence[str] | None = None,
     ) -> str:
         try:
             i = args.index(arg_id)
