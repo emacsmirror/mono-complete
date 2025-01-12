@@ -1,4 +1,4 @@
-;;; mono-complete-backend-whole-line.el --- DABBREV back-end -*- lexical-binding: t -*-
+;;; mono-complete-backend-whole-line.el --- Whole line back-end -*- lexical-binding: t -*-
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Copyright (C) 2023  Campbell Barton
 ;; URL: https://codeberg.org/ideasman42/emacs-mono-complete
