@@ -361,44 +361,45 @@ IS-CONTEXT is forwarded to the callback."
          "backend-used: (%d) %s" (length backend-info) (mapconcat #'identity backend-info ", "))))
 
     (while backends
-      (when-let ((backend-item (pop backends)))
-        (pcase-let ((`(,config ,_setup-fn ,prefix-fn ,complete-fn)
-                     (mono-complete--backend-items-or-warn backend-item)))
-          (when complete-fn
-            (let ((prefix nil))
-              (let ((prefix-fn-result-cons (assq prefix-fn prefix-cache)))
-                (cond
-                 (prefix-fn-result-cons
-                  (setq prefix (cdr prefix-fn-result-cons)))
-                 (t
-                  (condition-case-unless-debug err
-                      (setq prefix (funcall prefix-fn))
-                    (error
-                     (message "mono-complete: prefix function %S, failed with error (%S)"
-                              prefix-fn
-                              err)))
-                  (push (cons prefix-fn prefix) prefix-cache))))
-
-              ;; There may be no prefix, in this case skip.
-              (when prefix
-                (let ((backend-cache (mono-complete--backend-cache-ensure complete-fn)))
+      (let ((backend-item (pop backends)))
+        (when backend-item
+          (pcase-let ((`(,config ,_setup-fn ,prefix-fn ,complete-fn)
+                       (mono-complete--backend-items-or-warn backend-item)))
+            (when complete-fn
+              (let ((prefix nil))
+                (let ((prefix-fn-result-cons (assq prefix-fn prefix-cache)))
                   (cond
-                   ;; When the prefix was previously ignored, do nothing.
-                   ((and (stringp (car backend-cache))
-                         (string-prefix-p (car backend-cache) prefix)))
-
-                   ;; Call the completion function.
-                   ((let ((result-suffix
-                           (mono-complete--backend-call-and-update
-                            complete-fn config prefix backend-cache)))
-                      (when result-suffix
-                        (setq result (cons prefix result-suffix))))
-
-                    ;; Break.
-                    (setq backends nil))
+                   (prefix-fn-result-cons
+                    (setq prefix (cdr prefix-fn-result-cons)))
                    (t
-                    ;; Skip this prefix in the future to prevent excessive calculation.
-                    (setcar backend-cache prefix))))))))))
+                    (condition-case-unless-debug err
+                        (setq prefix (funcall prefix-fn))
+                      (error
+                       (message "mono-complete: prefix function %S, failed with error (%S)"
+                                prefix-fn
+                                err)))
+                    (push (cons prefix-fn prefix) prefix-cache))))
+
+                ;; There may be no prefix, in this case skip.
+                (when prefix
+                  (let ((backend-cache (mono-complete--backend-cache-ensure complete-fn)))
+                    (cond
+                     ;; When the prefix was previously ignored, do nothing.
+                     ((and (stringp (car backend-cache))
+                           (string-prefix-p (car backend-cache) prefix)))
+
+                     ;; Call the completion function.
+                     ((let ((result-suffix
+                             (mono-complete--backend-call-and-update
+                              complete-fn config prefix backend-cache)))
+                        (when result-suffix
+                          (setq result (cons prefix result-suffix))))
+
+                      ;; Break.
+                      (setq backends nil))
+                     (t
+                      ;; Skip this prefix in the future to prevent excessive calculation.
+                      (setcar backend-cache prefix)))))))))))
     result))
 
 (defun mono-complete--on-exit ()
@@ -694,18 +695,18 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
   ;; Run `setup' on all back-ends.
   (let ((backends (mono-complete--backends-from-config nil)))
     (while backends
-      (when-let ((backend-item (pop backends)))
-        (pcase-let ((`(,config ,setup-fn ,_prefix-fn ,_complete-fn)
-                     (mono-complete--backend-items-or-warn backend-item)))
-          (when setup-fn
-            (let ((config-next
-                   (condition-case-unless-debug err
-                       (funcall setup-fn config)
-                     (error
-                      (message "mono-complete: setup %S error (%S)" setup-fn err)
-                      ;; Skip the back-end.
-                      t))))
-              (plist-put backend-item :config config-next))))))))
+      (let ((backend-item (pop backends)))
+        (when backend-item
+          (pcase-let ((`(,config ,setup-fn ,_prefix-fn ,_complete-fn)
+                       (mono-complete--backend-items-or-warn backend-item)))
+            (when setup-fn
+              (let ((config-next
+                     (condition-case-unless-debug err
+                         (funcall setup-fn config)
+                       (error (message "mono-complete: setup %S error (%S)" setup-fn err)
+                              ;; Skip the back-end.
+                              t))))
+                (plist-put backend-item :config config-next)))))))))
 
 (defun mono-complete--mode-disable ()
   "Turn off option `mono-complete-mode' for the current buffer."
