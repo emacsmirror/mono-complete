@@ -112,6 +112,9 @@ Customization
 ``mono-complete-evil-insert-mode-only``: ``t``
    Restrict to insert mode when used in combination with ``evil-mode``.
 
+``mono-complete-meow-insert-mode-only``: ``t``
+   Restrict to insert mode when used in combination with ``meow-global-mode``.
+
 ``mono-complete-cache-directory``
    The directory to store mono-complete cache data.
 

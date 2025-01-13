@@ -58,6 +58,10 @@ instead of performing the completion action (which may give different results)."
   "Restrict to insert mode when used in combination with `evil-mode'."
   :type 'boolean)
 
+(defcustom mono-complete-meow-insert-mode-only t
+  "Restrict to insert mode when used in combination with `meow-mode'."
+  :type 'boolean)
+
 (defcustom mono-complete-cache-directory
   (locate-user-emacs-file "mono-complete" ".emacs-mono-complete")
   "The directory to store mono-complete cache data."
@@ -692,6 +696,16 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
    (t
     (mono-complete--command-hooks-enable)))
 
+  ;; Same as evil mode logic.
+  (cond
+   ((and mono-complete-meow-insert-mode-only (bound-and-true-p meow-global-mode))
+    (add-hook 'meow-insert-enter-hook #'mono-complete--temporary-enable nil t)
+    (add-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable nil t)
+    (when (and (fboundp 'meow--current-state) (eq (meow--current-state) 'insert))
+      (mono-complete--command-hooks-enable)))
+   (t
+    (mono-complete--command-hooks-enable)))
+
   ;; Run `setup' on all back-ends.
   (let ((backends (mono-complete--backends-from-config nil)))
     (while backends
@@ -719,6 +733,11 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
     ;; Harmless if these were not added.
     (remove-hook 'evil-insert-state-entry-hook #'mono-complete--temporary-enable t)
     (remove-hook 'evil-insert-state-exit-hook #'mono-complete--temporary-disable t))
+
+  (when mono-complete-meow-insert-mode-only
+    ;; Harmless if these were not added.
+    (remove-hook 'meow-insert-enter-hook #'mono-complete--temporary-enable t)
+    (remove-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable t))
 
   (when mono-complete--preview-overlay
     (delete-overlay mono-complete--preview-overlay))
