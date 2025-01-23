@@ -682,29 +682,31 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 (defun mono-complete--mode-enable ()
   "Turn on option `mono-complete-mode' for the current buffer."
   (declare (important-return-value nil))
-  (cond
-   ;; It's possible evil mode variables are available
-   ;; but the user is not in evil mode for this buffer, so check `evil-mode' first.
-   ((and mono-complete-evil-insert-mode-only (bound-and-true-p evil-mode))
-    (add-hook 'evil-insert-state-entry-hook #'mono-complete--temporary-enable nil t)
-    (add-hook 'evil-insert-state-exit-hook #'mono-complete--temporary-disable nil t)
 
-    ;; The symbol `evil-state' is most likely set when `evil-mode' is enabled.
-    ;; Check it's bound to avoid an error in the off-chance it's not.
-    (when (and (boundp 'evil-state) (memq (symbol-value 'evil-state) (list 'replace 'insert)))
-      (mono-complete--command-hooks-enable)))
-   (t
-    (mono-complete--command-hooks-enable)))
+  (let ((enable-handled nil))
+    (cond
+     ;; It's possible evil mode variables are available
+     ;; but the user is not in evil mode for this buffer, so check `evil-mode' first.
+     ((and mono-complete-evil-insert-mode-only (bound-and-true-p evil-mode))
+      (add-hook 'evil-insert-state-entry-hook #'mono-complete--temporary-enable nil t)
+      (add-hook 'evil-insert-state-exit-hook #'mono-complete--temporary-disable nil t)
 
-  ;; Same as evil mode logic.
-  (cond
-   ((and mono-complete-meow-insert-mode-only (bound-and-true-p meow-global-mode))
-    (add-hook 'meow-insert-enter-hook #'mono-complete--temporary-enable nil t)
-    (add-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable nil t)
-    (when (and (fboundp 'meow--current-state) (eq (meow--current-state) 'insert))
+      ;; The symbol `evil-state' is most likely set when `evil-mode' is enabled.
+      ;; Check it's bound to avoid an error in the off-chance it's not.
+      (when (and (boundp 'evil-state) (memq (symbol-value 'evil-state) (list 'replace 'insert)))
+        (mono-complete--command-hooks-enable))
+      (setq enable-handled t))
+
+     ;; Same as evil mode logic.
+     ((and mono-complete-meow-insert-mode-only (bound-and-true-p meow-global-mode))
+      (add-hook 'meow-insert-enter-hook #'mono-complete--temporary-enable nil t)
+      (add-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable nil t)
+      (when (and (fboundp 'meow--current-state) (eq (meow--current-state) 'insert))
+        (mono-complete--command-hooks-enable))
+      (setq enable-handled t)))
+
+    (unless enable-handled
       (mono-complete--command-hooks-enable)))
-   (t
-    (mono-complete--command-hooks-enable)))
 
   ;; Run `setup' on all back-ends.
   (let ((backends (mono-complete--backends-from-config nil)))
