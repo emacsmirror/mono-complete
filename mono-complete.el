@@ -62,6 +62,13 @@ instead of performing the completion action (which may give different results)."
   "Restrict to insert mode when used in combination with `meow-mode'."
   :type 'boolean)
 
+(defvar mono-complete-generic-insert-mode-functions nil
+  "Restrict to insert mode when used in combination with modal editing.
+When non-nil this must be a list of 3 symbols referencing functions.
+- Predicate function (return non-null when the mode is enabled).
+- Enter hook.
+- Exit hook.")
+
 (defcustom mono-complete-cache-directory
   (locate-user-emacs-file "mono-complete" ".emacs-mono-complete")
   "The directory to store mono-complete cache data."
@@ -703,7 +710,20 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
       (add-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable nil t)
       (when (and (fboundp 'meow--current-state) (eq (meow--current-state) 'insert))
         (mono-complete--command-hooks-enable))
-      (setq enable-handled t)))
+      (setq enable-handled t))
+     ;; Generic insert mode support.
+     (mono-complete-generic-insert-mode-functions
+      (let ((is-insert-mode nil))
+        (with-demoted-errors "mono-complete: generic-insert mode error (%S)"
+          (pcase-let ((`(,generic-predicate-fn ,generic-enter-hook ,generic-exit-hook)
+                       mono-complete-generic-insert-mode-functions))
+            (add-hook generic-enter-hook #'mono-complete--temporary-enable nil t)
+            (add-hook generic-exit-hook #'mono-complete--temporary-disable nil t)
+            (setq is-insert-mode (funcall generic-predicate-fn))))
+
+        (when is-insert-mode
+          (mono-complete--command-hooks-enable))
+        (setq enable-handled t))))
 
     (unless enable-handled
       (mono-complete--command-hooks-enable)))
@@ -740,6 +760,13 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
     ;; Harmless if these were not added.
     (remove-hook 'meow-insert-enter-hook #'mono-complete--temporary-enable t)
     (remove-hook 'meow-insert-exit-hook #'mono-complete--temporary-disable t))
+
+  (when mono-complete-generic-insert-mode-functions
+    (with-demoted-errors "mono-complete: generic-insert mode error (%S)"
+      (pcase-let ((`(,_generic-predicate-fn ,generic-enter-hook ,generic-exit-hook)
+                   mono-complete-generic-insert-mode-functions))
+        (remove-hook generic-enter-hook #'mono-complete--temporary-enable t)
+        (remove-hook generic-exit-hook #'mono-complete--temporary-disable t))))
 
   (when mono-complete--preview-overlay
     (delete-overlay mono-complete--preview-overlay))

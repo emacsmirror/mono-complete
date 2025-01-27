@@ -115,6 +115,15 @@ Customization
 ``mono-complete-meow-insert-mode-only``: ``t``
    Restrict to insert mode when used in combination with ``meow-global-mode``.
 
+``mono-complete-generic-insert-mode-functions``: ``nil``
+   Restrict to insert mode using generic callbacks.
+
+   When set, this must be a list of 3 items:
+
+   - Predicate function (return non-null when the mode is enabled).
+   - Enter hook symbol.
+   - Exit hook symbol.
+
 ``mono-complete-cache-directory``
    The directory to store mono-complete cache data.
 
