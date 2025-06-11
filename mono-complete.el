@@ -288,7 +288,9 @@ When DESCRIPTIONP is non-nil, return it's description."
                   (progn
                     (require preset-sym)
                     t)
-                (error (message "mono-complete: back-end %S not found! (%S)" preset-sym err) nil))
+                (error
+                 (message "mono-complete: back-end %S not found! (%S)" preset-sym err)
+                 nil))
           (setq result (funcall preset-sym))))
 
       ;; Put the result in the hash even when it's nil, not to regenerate.
@@ -739,9 +741,10 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
               (let ((config-next
                      (condition-case-unless-debug err
                          (funcall setup-fn config)
-                       (error (message "mono-complete: setup %S error (%S)" setup-fn err)
-                              ;; Skip the back-end.
-                              t))))
+                       (error
+                        (message "mono-complete: setup %S error (%S)" setup-fn err)
+                        ;; Skip the back-end.
+                        t))))
                 (plist-put backend-item :config config-next)))))))))
 
 (defun mono-complete--mode-disable ()
