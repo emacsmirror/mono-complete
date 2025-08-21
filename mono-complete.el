@@ -140,7 +140,11 @@ using `default-directory' as a fallback."
 (defun mono-complete-project-root ()
   "Return the project directory (or default)."
   (declare (important-return-value t))
-  (file-name-as-directory (or (funcall mono-complete-project-root) default-directory)))
+  ;; Needed in case the path is relative or begins with "~" for HOME.
+  ;; If the input to `file-name-as-directory' is an empty string,
+  ;; this gets converted to "./" the expanded to the absolute location.
+  (expand-file-name
+   (file-name-as-directory (or (funcall mono-complete-project-root) default-directory))))
 
 
 ;; ---------------------------------------------------------------------------
