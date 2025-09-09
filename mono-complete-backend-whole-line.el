@@ -103,7 +103,7 @@
             (skip-chars-backward "[:blank:]" pos-beg)
             (let ((pos-end (point)))
               (when trailing-text
-                (setq pos-end (- pos-end (length trailing-text))))
+                (decf pos-end (length trailing-text)))
               (when (< pos-beg (point))
                 (setq result (list (buffer-substring-no-properties pos-beg pos-end)))))))
 
@@ -118,7 +118,7 @@
               (skip-chars-backward "[:blank:]" pos-beg)
               (let ((pos-end (point)))
                 (when trailing-text
-                  (setq pos-end (- pos-end (length trailing-text))))
+                  (decf pos-end (length trailing-text)))
                 (when (< pos-beg pos-end)
                   (setq result (list (buffer-substring-no-properties pos-beg pos-end))))))))))
     (cons result cache)))

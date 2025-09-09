@@ -83,9 +83,9 @@
                     (let ((ch-prev (preceding-char)))
                       (cond
                        ((eq ch-prev ?.)
-                        (setq pos-beg (1- pos-beg)))
+                        (decf pos-beg))
                        ((eq ch-prev ?~)
-                        (setq pos-beg (1- pos-beg)))))
+                        (decf pos-beg))))
                     (let ((prefix-test (buffer-substring-no-properties pos-beg pos-init)))
                       (pcase-let ((`(,directory . ,filename)
                                    (mono-complete-backend-filesystem--split-path prefix-test)))
