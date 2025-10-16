@@ -146,6 +146,9 @@ using `default-directory' as a fallback."
     (funcall #'ffip-project-root))
    ((fboundp 'projectile-project-root)
     (funcall #'projectile-project-root))
+   ((and (fboundp 'project-current) (fboundp 'project-root))
+    (let ((project (funcall #'project-current)))
+      (and project (funcall #'project-root project))))
    (t
     (or (when buffer-file-name
           (let ((vc-backend
