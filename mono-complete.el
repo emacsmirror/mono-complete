@@ -75,7 +75,8 @@ When non-nil this must be a list of 3 symbols referencing functions.
   :type 'string)
 
 (defface mono-complete-preview-face '((t (:foreground "#ffff00" :background "#000000")))
-  "Face for the preview.")
+  "Face for the preview."
+  :group 'mono-complete)
 
 
 ;; ---------------------------------------------------------------------------
