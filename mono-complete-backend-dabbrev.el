@@ -134,7 +134,7 @@ see `advice-add' documentation."
         (let ((pos-init (point))
               (pos-next nil))
           (forward-char -1)
-          (while (and (looking-at dabbrev--abbrev-char-regexp) (not (eq pos-next (point))))
+          (while (and (looking-at dabbrev--abbrev-char-regexp) (null (eq pos-next (point))))
             (setq pos-next (point))
             (unless (bobp)
               (forward-char -1)))

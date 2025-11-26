@@ -241,7 +241,7 @@ using `default-directory' as a fallback."
     ;; Interactive only, when non-interactive,
     ;; the macros called here will be in-lined
     ;; and there is no need to perform any functionality in that case.
-    (not (or executing-kbd-macro noninteractive)))
+    (null (or executing-kbd-macro noninteractive)))
    (t
     t)))
 
@@ -668,7 +668,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
           (setq do-clear-timer nil))))
 
       (when (eq do-reset :unset)
-        (setq do-reset (not (mono-complete--is-mono-complete-command this-command))))
+        (setq do-reset (null (mono-complete--is-mono-complete-command this-command))))
 
       (when do-clear-timer
         (when (timerp mono-complete--preview-timer)

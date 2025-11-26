@@ -123,13 +123,13 @@ When IS-PARTIAL is non-nil, an extra word is required."
         (words (list))
         (search t))
     (save-excursion
-      (while (and search (< (length words) words-limit-max) (not (eq pos-step-prev (point))))
+      (while (and search (< (length words) words-limit-max) (null (eq pos-step-prev (point))))
         (setq pos-step-prev (point))
         (skip-chars-backward "\n[:blank:][:punct:]")
 
         ;; Early exit on full-stop, ! ... etc.
         (cond
-         ((not
+         ((null
            (mono-complete-backend-word-predict--range-contains
             (point) pos-step-prev "^.!?:;)\\]}"))
           (setq search nil))
