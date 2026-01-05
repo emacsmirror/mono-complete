@@ -56,7 +56,7 @@ Each entry is a UNIX style glob."
   "Files above this size will be ignored when scanning directories recursively.
 This can avoid slow parsing for source files which are used as data-storage.
 Zero disabled size limit checks."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom mono-complete-backend-word-predict-input-paths (list "")
   "Paths used for extracting text.
@@ -79,7 +79,7 @@ Zero disabled size limit checks."
 (defcustom mono-complete-backend-word-predict-ngram-max 5
   "The n-gram size.
 2 or more, avoid values over 4 (or accept very large data-bases)."
-  :type 'integer)
+  :type 'natnum)
 
 (defconst mono-complete-backend-word-predict--command
   (concat

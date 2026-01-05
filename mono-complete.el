@@ -72,7 +72,7 @@ When non-nil this must be a list of 3 symbols referencing functions.
 (defcustom mono-complete-cache-directory
   (locate-user-emacs-file "mono-complete" ".emacs-mono-complete")
   "The directory to store mono-complete cache data."
-  :type 'string)
+  :type 'directory)
 
 (defface mono-complete-preview-face '((t (:foreground "#ffff00" :background "#000000")))
   "Face for the preview."
