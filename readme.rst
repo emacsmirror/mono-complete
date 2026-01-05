@@ -13,7 +13,7 @@ The following features are supported:
   so the literal text input is replayed instead of re-running the completion in a different context
   which may give a different result.
 - Context sensitive, so entirely different completions can be configured based on kind of text being edited.
-- Buffer local configuration. Each buffer can have it's own local completion configuration
+- Buffer local configuration. Each buffer can have its own local completion configuration
   that may include project-local expansions.
 
 
@@ -22,7 +22,7 @@ Motivation
 
 The motivation for writing this package was to achieve something similar to completion I was used
 to on the FISH-shell which can be configured to suggest something based on previously used commands.
-While text entry in an editor doesn't lend it's self to command reuse in quite the same way,
+While text entry in an editor doesn't lend itself to command reuse in quite the same way,
 an ability to complete the most "likely" candidate is still possible.
 
 In contrast to most existing completion systems in emacs,
@@ -31,7 +31,7 @@ This works well with natural language input (text input typically found on phone
 Where statistical analysis can run on existing text (including code-comments, commit-logs and plain-text)
 to predict the most likely words to use based on previous words while typing.
 
-Always previewing a completion is a convenient way to show text input might not have anticipated would be available
+Always previewing a completion is a convenient way to show text the user might not have anticipated would be available
 in a way that isn't overly intrusive.
 
 There can be multiple methods of generating suggestions which can all be enabled at once
@@ -113,14 +113,14 @@ Customization
    Restrict to insert mode when used in combination with ``evil-mode``.
 
 ``mono-complete-meow-insert-mode-only``: ``t``
-   Restrict to insert mode when used in combination with ``meow-global-mode``.
+   Restrict to insert mode when used in combination with ``meow-mode``.
 
 ``mono-complete-generic-insert-mode-functions``: ``nil``
    Restrict to insert mode using generic callbacks.
 
    When set, this must be a list of 3 items:
 
-   - Predicate function (return non-null when the mode is enabled).
+   - Predicate function (return non-nil when the mode is enabled).
    - Enter hook symbol.
    - Exit hook symbol.
 
@@ -216,7 +216,7 @@ Included Backends
    A completion back-end is a property list containing the following keys:
 
    :config *(optional) list*
-      This is it's self a list which may be used to configure the completion.
+      This is itself a list which may be used to configure the completion.
       You can for example: multiple instantiating of the same back-end can be
       used at once with different configurations.
 
@@ -227,7 +227,7 @@ Included Backends
 
       The function may manipulate ``:config`` (taking it as an argument and returning it).
       Take care to always return the ``:config`` otherwise this will clear the configuration.
-      This is it's self a list which may be used to configure the completion.
+      This is itself a list which may be used to configure the completion.
 
       To skip the completion back end you may:
 
@@ -241,10 +241,10 @@ Included Backends
       Return text before the cursor or nil.
 
    :complete *function*
-      Takes ``(config prefix cache)``, returns a list of strings.
+      Takes ``(config prefix cache)``.
 
-      Returns a cons cell ``(result . cache)`` where the result is a list of strings
+      Returns a cons cell ``(result . cache)`` where the result is a list of strings (or nil)
       and the cache is an implementation defined variable which can store any values
-      assist in refining the completion as additional keys are entered.
+      to assist in refining the completion as additional keys are entered.
 
-      Return a list of completion text or nil to fall through to other completers.
+      Return nil as result to fall through to other completers.
