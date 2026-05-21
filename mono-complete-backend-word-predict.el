@@ -127,7 +127,7 @@ When IS-PARTIAL is non-nil, an extra word is required."
         (setq pos-step-prev (point))
         (skip-chars-backward "\n[:blank:][:punct:]")
 
-        ;; Early exit on full-stop, ! ... etc.
+        ;; Early exit on full-stop, !, etc.
         (cond
          ((null
            (mono-complete-backend-word-predict--range-contains
@@ -315,7 +315,7 @@ TODO: support CONFIG."
 
 ;;;###autoload
 (defun mono-complete-backend-word-predict ()
-  "DEBBREV completer."
+  "Word-predict completer."
   (list
    :setup #'mono-complete-backend-word-predict-setup
    :prefix #'mono-complete-backend-word-predict-prefix

@@ -119,7 +119,7 @@ This only ever make the first letter upper-case."
 
 ;;;###autoload
 (defun mono-complete-backend-spell-fu ()
-  "DEBBREV completer."
+  "Spell-fu completer."
   (list
    :prefix #'mono-complete-backend-spell-fu-prefix
    :complete #'mono-complete-backend-spell-fu-complete))

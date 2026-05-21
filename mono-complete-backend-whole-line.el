@@ -129,7 +129,7 @@
 
 ;;;###autoload
 (defun mono-complete-backend-whole-line ()
-  "DEBBREV completer."
+  "Whole-line completer."
   (list
    :prefix #'mono-complete-backend-whole-line-prefix
    :complete #'mono-complete-backend-whole-line-complete))

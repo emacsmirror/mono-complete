@@ -18,7 +18,7 @@
 (defmacro mono-complete-backend-dabbrev--with-advice (advice &rest body)
   "Execute BODY with ADVICE temporarily enabled.
 
-Advice are triplets of (SYMBOL HOW FUNCTION),
+Each advice is a triplet of (SYMBOL HOW FUNCTION),
 see `advice-add' documentation."
   (declare (indent 1))
   (let ((advice-list advice)
@@ -163,7 +163,7 @@ see `advice-add' documentation."
 
 ;;;###autoload
 (defun mono-complete-backend-dabbrev ()
-  "DEBBREV completer."
+  "Dabbrev completer."
   (list
    :prefix #'mono-complete-backend-dabbrev-prefix
    :complete #'mono-complete-backend-dabbrev-complete))

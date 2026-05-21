@@ -160,7 +160,7 @@
 
 ;;;###autoload
 (defun mono-complete-backend-filesystem ()
-  "DEBBREV completer."
+  "File-system completer."
   (list
    :prefix #'mono-complete-backend-filesystem-prefix
    :complete #'mono-complete-backend-filesystem-complete))

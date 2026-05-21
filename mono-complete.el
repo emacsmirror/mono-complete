@@ -33,7 +33,7 @@
 When a function is used this takes a single boolean IS-CONTEXT argument.
 When non-nil return all back-ends that may be used for the buffer,
 otherwise return a sub-set of this list based on the current context."
-  :type '(repeat function))
+  :type '(choice (repeat symbol) function))
 
 (defcustom mono-complete-preview-delay 0.235
   "How long to wait until displaying the preview after a keystroke (in seconds)."
@@ -41,11 +41,11 @@ otherwise return a sub-set of this list based on the current context."
 
 (defcustom mono-complete-self-insert-commands '(self-insert-command org-self-insert-command)
   "A list of commands after which to show a preview."
-  :type '(repeat function))
+  :type '(repeat symbol))
 
 (defcustom mono-complete-fallback-command 'indent-for-tab-command
   "Command to run when no preview is available."
-  :type 'function)
+  :type 'symbol)
 
 (defcustom mono-complete-literal-input t
   "Simulate literal text input.
@@ -65,7 +65,7 @@ instead of performing the completion action (which may give different results)."
 (defvar mono-complete-generic-insert-mode-functions nil
   "Restrict to insert mode when used in combination with modal editing.
 When non-nil this must be a list of 3 symbols referencing functions.
-- Predicate function (return non-null when the mode is enabled).
+- Predicate function (return non-nil when the mode is enabled).
 - Enter hook.
 - Exit hook.")
 
@@ -178,7 +178,7 @@ using `default-directory' as a fallback."
 (defvar-local mono-complete--preview-overlay nil)
 
 ;; The preview overlay state or nil when the command.
-;; This is the result of `mono-complete--preview-state-from-overlay' see it's doc-string for details.
+;; This is the result of `mono-complete--preview-state-from-overlay' see its doc-string for details.
 (defvar-local mono-complete--preview-overlay-was-visible nil)
 
 ;; The preview idle timer.
@@ -247,7 +247,7 @@ using `default-directory' as a fallback."
 
 (defun mono-complete--key-from-command (fn &optional descriptionp)
   "Return the key for command symbol FN.
-When DESCRIPTIONP is non-nil, return it's description."
+When DESCRIPTIONP is non-nil, return its description."
   (declare (important-return-value t))
   (unless (commandp fn)
     (error "Not a command: %s" fn))
@@ -808,7 +808,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 
 (defun mono-complete--expand-impl ()
   "Expand the completion, return non-nil on success."
-  (declare (important-return-value nil))
+  (declare (important-return-value t))
   (let ((text (mono-complete--preview-text-from-command)))
     (when (string-empty-p text)
       (setq text nil))
@@ -838,7 +838,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 ;;;###autoload
 (defun mono-complete-expand ()
   "Expand the completion, return non-nil on success."
-  (declare (important-return-value nil))
+  (declare (important-return-value t))
   (interactive)
   (when (mono-complete--interactive-or-non-literal-input)
     (mono-complete--expand-impl)))
@@ -846,7 +846,7 @@ Argument STATE is the result of `mono-complete--preview-state-from-overlay'."
 ;;;###autoload
 (defun mono-complete-expand-or-fallback ()
   "Expand the completion, return non-nil on success.
-Otherwise run `mono-complete-callback-fn' and return it's result."
+Otherwise run `mono-complete-callback-fn' and return its result."
   (declare (important-return-value nil))
   (interactive)
   (when (mono-complete--interactive-or-non-literal-input)
