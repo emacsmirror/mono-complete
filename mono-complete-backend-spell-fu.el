@@ -14,7 +14,7 @@
 
 ;; Note: uses `spell-fu' variables:
 ;; - `spell-fu-word-regexp'.
-;; - `spell-fu-dictionaries'.
+;; - `spell-fu-dictionaries' has it's hash value exposed as `spell-fu--cache-table-list'.
 
 ;; ---------------------------------------------------------------------------
 ;; Internal Utilities
@@ -105,8 +105,8 @@ This only ever make the first letter upper-case."
                        (setq result-length k-length)
                        (setq result (concat prefix (substring k prefix-length))))))))))))
 
-      (dolist (dict (bound-and-true-p spell-fu-dictionaries))
-        (maphash test-fn (symbol-value dict))))
+      (dolist (dict (bound-and-true-p spell-fu--cache-table-list))
+        (maphash test-fn dict)))
 
     (when result
       (setq result (list (substring result prefix-length))))
